@@ -8,6 +8,8 @@ class LogoApp extends StatefulWidget {
 
 class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   Animation<double> animation;
+  Animation<double> sizeAnimation;
+  Animation<double> opacityAnimation;
   AnimationController controller;
 
   @override
@@ -16,14 +18,15 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
     controller =
         AnimationController(duration: const Duration(seconds: 2), vsync: this);
 
-    animation = Tween<double>(begin: 0, end: 300).animate(controller)..addStatusListener((AnimationStatus status) {
-      print('$status');
-      if(status == AnimationStatus.completed) {
-        controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        controller.forward();
-      }
-    });
+    animation = CurvedAnimation(parent: controller, curve: Curves.easeIn)
+      ..addStatusListener((AnimationStatus status) {
+        print('$status');
+        if (status == AnimationStatus.completed) {
+          controller.reverse();
+        } else if (status == AnimationStatus.dismissed) {
+          controller.forward();
+        }
+      });
 
     controller.forward();
   }
@@ -38,15 +41,21 @@ class AnimatedLogo extends AnimatedWidget {
   AnimatedLogo({Key key, Animation<double> animation})
       : super(key: key, listenable: animation);
 
+  static final _opacityTween = Tween<double>(begin: 0.1, end: 1);
+  static final _sizeTween = Tween<double>(begin: 0, end: 300);
+
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = listenable;
 
     return Center(
-      child: Container(
-        height: animation.value,
-        width: animation.value,
-        child: FlutterLogo(),
+      child: Opacity(
+        opacity: _opacityTween.evaluate(animation),
+        child: Container(
+          height: _sizeTween.evaluate(animation),
+          width: _sizeTween.evaluate(animation),
+          child: FlutterLogo(),
+        ),
       ),
     );
   }
