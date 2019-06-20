@@ -8,6 +8,8 @@ class LogoApp extends StatefulWidget {
 
 class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   Animation<double> animation;
+  Animation<double> sizeAnimation;
+  Animation<double> opacityAnimation;
   AnimationController controller;
 
   @override
@@ -15,6 +17,9 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
     super.initState();
     controller =
         AnimationController(duration: const Duration(seconds: 2), vsync: this);
+
+    sizeAnimation = Tween<double>(begin: 0, end: 300).animate(controller);
+    opacityAnimation = Tween<double>(begin: 0.1, end: 1).animate(controller);
 
     animation = Tween<double>(begin: 0, end: 300).animate(controller)
       ..addStatusListener((AnimationStatus status) {
@@ -30,38 +35,28 @@ class _LogoAppState extends State<LogoApp> with SingleTickerProviderStateMixin {
   }
 
   @override
-  Widget build(BuildContext context) => GrowTransition(
-        child: LogoWidget(),
+  Widget build(BuildContext context) => AnimatedLogo(
         animation: animation,
       );
 }
 
-class GrowTransition extends StatelessWidget {
-  final Widget child;
-  final Animation<double> animation;
+class AnimatedLogo extends AnimatedWidget {
+  AnimatedLogo({Key key, Animation<double> animation})
+      : super(key: key, listenable: animation);
 
-  GrowTransition({this.child, this.animation});
+      static final _opacityTween = Tween<double>(begin: 0.1, end: 1);
+      static final _sizeTween = Tween<double>(begin: 0, end: 300);
 
-  @override
-  Widget build(BuildContext context) => Center(
-        child: AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) => Container(
-                height: animation.value,
-                width: animation.value,
-                child: child,
-              ),
-          child: child,
-        ),
-      );
-}
-
-class LogoWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.symmetric(vertical: 10),
-      child: FlutterLogo(),
+    final Animation<double> animation = listenable;
+
+    return Center(
+      child: Container(
+        height: animation.value,
+        width: animation.value,
+        child: FlutterLogo(),
+      ),
     );
   }
 }
